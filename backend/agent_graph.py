@@ -100,7 +100,7 @@ def correction_node(state: AgentState):
         schema = {table_name: schema[table_name]}
 
     prompt = f"""
-You are an expert SQLite SQL developer.
+You are an expert PostgreSQL SQL developer.
 
 USER QUESTION:
 {state['user_question']}
@@ -115,7 +115,7 @@ ERROR:
 {state['error']}
 
 Rules:
-1. Generate only SQLite SELECT queries.
+1. Generate only PostgreSQL SELECT queries.
 2. Use only tables and columns in the provided schema.
 3. Use correct JOIN conditions when needed.
 4. Do not modify the database.

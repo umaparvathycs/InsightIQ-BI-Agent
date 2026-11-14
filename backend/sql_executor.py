@@ -1,43 +1,58 @@
 
-import sqlite3
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "database" / "business.db"
+load_dotenv(BASE_DIR / ".env")
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not configured.")
+
+DATABASE_URL = DATABASE_URL.replace(
+    "postgresql://",
+    "postgresql+psycopg2://",
+    1
+)
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
 
 
 def execute_sql(sql_query):
 
     try:
-        # Open database in read-only mode
-        connection = sqlite3.connect(
-            f"file:{DB_PATH.as_posix()}?mode=ro",
-            uri=True
-        )
+        with engine.connect() as connection:
 
-        # Enable read-only query mode
-        connection.execute("PRAGMA query_only = ON")
+            # Start a read-only transaction
+            connection.execute(
+                text("SET TRANSACTION READ ONLY")
+            )
 
-        # Execute SQL query
-        cursor = connection.execute(sql_query)
+            # Execute the generated SQL query
+            result = connection.execute(
+                text(sql_query)
+            )
 
-        # Fetch results
-        rows = cursor.fetchmany(100)
+            # Fetch maximum 100 rows
+            rows = result.fetchmany(100)
 
-        # Get column names
-        columns = [
-            description[0]
-            for description in cursor.description
-        ]
+            # Get column names
+            columns = list(result.keys())
 
-        connection.close()
-
-        return {
-            "success": True,
-            "columns": columns,
-            "rows": rows,
-            "row_count": len(rows)
-        }
+            return {
+                "success": True,
+                "columns": columns,
+                "rows": [tuple(row) for row in rows],
+                "row_count": len(rows)
+            }
 
     except Exception as error:
 

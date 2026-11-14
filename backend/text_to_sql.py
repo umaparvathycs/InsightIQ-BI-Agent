@@ -11,30 +11,42 @@ def generate_sql(user_question, table_name=None):
 
     # If a table is specified, use only that table's schema
     if table_name:
+
         if table_name not in schema:
-            raise ValueError(f"Table '{table_name}' does not exist.")
+            raise ValueError(
+                f"Table '{table_name}' does not exist."
+            )
 
-        schema = {table_name: schema[table_name]}
+        schema = {
+            table_name: schema[table_name]
+        }
 
-    schema_text = json.dumps(schema, indent=2)
+    schema_text = json.dumps(
+        schema,
+        indent=2
+    )
 
     prompt = f"""
 You are an expert Text-to-SQL assistant.
 
 Convert the user's natural language question
-into a valid SQLite SQL query.
+into a valid PostgreSQL SQL query.
 
 DATABASE SCHEMA:
 {schema_text}
 
 RULES:
-1. Generate only SQLite-compatible SQL.
+1. Generate only PostgreSQL-compatible SQL.
 2. Generate only SELECT queries.
 3. Never modify database data or structure.
 4. Use only tables and columns in the provided schema.
 5. Generate correct SQL based on the user's question.
-6. Return only the SQL query.
-7. Do not include Markdown or explanations.
+6. Use PostgreSQL functions and syntax where necessary.
+7. Do not use SQLite-specific functions or syntax.
+8. Return only the SQL query.
+9. Do not include Markdown or explanations.
+10. Always put a space between SQL keywords and numeric values,
+    such as LIMIT 1, LIMIT 5, and OFFSET 10.
 
 USER QUESTION:
 {user_question}

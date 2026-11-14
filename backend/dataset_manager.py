@@ -1,25 +1,45 @@
 
-import sqlite3
+import os
 import re
 from pathlib import Path
 
 import pandas as pd
+from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
 
 
+# Load environment variables
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "database" / "business.db"
+load_dotenv(BASE_DIR / ".env")
 
-# Create database directory automatically if it doesn't exist
-DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Number of CSV rows processed at a time
+if not DATABASE_URL:
+    raise ValueError(
+        "DATABASE_URL environment variable is not configured."
+    )
+
+
+# PostgreSQL connection using SQLAlchemy
+DATABASE_URL = DATABASE_URL.replace(
+    "postgresql://",
+    "postgresql+psycopg2://",
+    1
+)
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
+
 CHUNK_SIZE = 10000
 
 
 def clean_table_name(filename):
-    """Convert filename into a safe SQLite table name."""
+    """Convert filename into a safe PostgreSQL table name."""
 
     name = Path(filename).stem.lower()
+
     name = re.sub(r"[^a-z0-9_]", "_", name)
     name = re.sub(r"_+", "_", name).strip("_")
 
@@ -29,7 +49,7 @@ def clean_table_name(filename):
     if name[0].isdigit():
         name = "dataset_" + name
 
-    return name
+    return name[:63]
 
 
 def clean_column_names(df):
@@ -40,8 +60,18 @@ def clean_column_names(df):
     for index, column in enumerate(df.columns):
 
         clean_name = str(column).strip().lower()
-        clean_name = re.sub(r"[^a-z0-9_]", "_", clean_name)
-        clean_name = re.sub(r"_+", "_", clean_name).strip("_")
+
+        clean_name = re.sub(
+            r"[^a-z0-9_]",
+            "_",
+            clean_name
+        )
+
+        clean_name = re.sub(
+            r"_+",
+            "_",
+            clean_name
+        ).strip("_")
 
         if not clean_name:
             clean_name = f"column_{index + 1}"
@@ -49,7 +79,7 @@ def clean_column_names(df):
         if clean_name[0].isdigit():
             clean_name = "column_" + clean_name
 
-        columns.append(clean_name)
+        columns.append(clean_name[:63])
 
     unique_columns = []
     seen = {}
@@ -60,7 +90,8 @@ def clean_column_names(df):
         seen[column] = count + 1
 
         if count:
-            column = f"{column}_{count + 1}"
+            suffix = f"_{count + 1}"
+            column = column[:63 - len(suffix)] + suffix
 
         unique_columns.append(column)
 
@@ -70,73 +101,63 @@ def clean_column_names(df):
 
 
 def load_dataset(file_path, filename):
-    """Read CSV or XLSX and store it as a SQLite table."""
+    """Read CSV or XLSX and store it as a PostgreSQL table."""
 
     extension = Path(filename).suffix.lower()
     table_name = clean_table_name(filename)
 
-    # ======================================
-    # CSV CHUNK PROCESSING
-    # ======================================
+    total_rows = 0
+    columns = None
 
+    # CSV upload
     if extension == ".csv":
 
-        total_rows = 0
-        columns = None
+        for chunk in pd.read_csv(
+            file_path,
+            chunksize=CHUNK_SIZE
+        ):
 
-        with sqlite3.connect(DB_PATH) as connection:
+            if chunk.empty:
+                continue
 
-            # Remove previous table with the same name
-            connection.execute(
-                f'DROP TABLE IF EXISTS "{table_name}"'
-            )
+            chunk = clean_column_names(chunk)
 
-            for chunk in pd.read_csv(
-                file_path,
-                chunksize=CHUNK_SIZE
-            ):
+            if columns is None:
 
-                if chunk.empty:
-                    continue
+                columns = list(chunk.columns)
 
-                chunk = clean_column_names(chunk)
-
-                if columns is None:
-
-                    columns = list(chunk.columns)
-
-                    chunk.to_sql(
-                        table_name,
-                        connection,
-                        if_exists="replace",
-                        index=False
-                    )
-
-                else:
-
-                    if list(chunk.columns) != columns:
-                        raise ValueError(
-                            "CSV column names changed during processing."
+                # Remove an existing table before uploading
+                with engine.begin() as connection:
+                    connection.execute(
+                        text(
+                            f'DROP TABLE IF EXISTS "{table_name}"'
                         )
-
-                    chunk.to_sql(
-                        table_name,
-                        connection,
-                        if_exists="append",
-                        index=False
                     )
 
-                total_rows += len(chunk)
+            elif list(chunk.columns) != columns:
 
-            if total_rows == 0:
                 raise ValueError(
-                    "The uploaded dataset is empty."
+                    "CSV column names changed during processing."
                 )
 
-    # ======================================
-    # EXCEL PROCESSING
-    # ======================================
+            # Insert data into PostgreSQL
+            chunk.to_sql(
+                table_name,
+                engine,
+                if_exists="replace" if total_rows == 0 else "append",
+                index=False,
+                chunksize=500,
+                method="multi"
+            )
 
+            total_rows += len(chunk)
+
+        if total_rows == 0:
+            raise ValueError(
+                "The uploaded dataset is empty."
+            )
+
+    # Excel upload
     elif extension == ".xlsx":
 
         df = pd.read_excel(
@@ -145,21 +166,24 @@ def load_dataset(file_path, filename):
         )
 
         if df.empty:
-            raise ValueError("The uploaded dataset is empty.")
+            raise ValueError(
+                "The uploaded dataset is empty."
+            )
 
         df = clean_column_names(df)
 
-        with sqlite3.connect(DB_PATH) as connection:
+        columns = list(df.columns)
 
-            df.to_sql(
-                table_name,
-                connection,
-                if_exists="replace",
-                index=False
-            )
+        df.to_sql(
+            table_name,
+            engine,
+            if_exists="replace",
+            index=False,
+            chunksize=500,
+            method="multi"
+        )
 
         total_rows = len(df)
-        columns = list(df.columns)
 
     else:
 
@@ -168,7 +192,9 @@ def load_dataset(file_path, filename):
         )
 
     if not columns:
-        raise ValueError("The dataset has no columns.")
+        raise ValueError(
+            "The dataset has no columns."
+        )
 
     return {
         "success": True,
@@ -179,4 +205,5 @@ def load_dataset(file_path, filename):
 
 
 if __name__ == "__main__":
-    print("Dataset manager is ready.")
+
+    print("PostgreSQL dataset manager is ready.")
