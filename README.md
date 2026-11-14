@@ -211,42 +211,10 @@ Laptop
 
 The system identifies the product with the highest calculated sales based on quantity multiplied by unit price.
 
-## 📊 Application Screenshots
 
-Add screenshots of your actual application in a folder named `screenshots`.
 
-Suggested images:
 
-```text
-screenshots/
-├── dashboard.png
-├── upload.png
-├── query_result.png
-├── chart.png
-└── insights.png
-```
 
-Display them in this section:
-
-### Dashboard
-
-![InsightIQ Dashboard](screenshots/dashboard.png)
-
-### Dataset Upload
-
-![Dataset Upload](screenshots/upload.png)
-
-### Query Results
-
-![Query Results](screenshots/query_result.png)
-
-### Data Visualization
-
-![Data Visualization](screenshots/chart.png)
-
-### AI Business Insights
-
-![AI Business Insights](screenshots/insights.png)
 
 ## 🔐 Security Considerations
 
