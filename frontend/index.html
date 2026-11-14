@@ -1,0 +1,590 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>InsightIQ | AI Business Intelligence</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- ==========================================
+         SIDEBAR
+    ========================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">I</div>
+
+            <div>
+                <h2>InsightIQ</h2>
+                <span>AI Business Intelligence</span>
+            </div>
+
+        </div>
+
+        <p class="menu-label">WORKSPACE</p>
+
+        <nav class="sidebar-nav">
+
+            <a href="#overview" class="nav-item active">
+                ◈ Dashboard
+            </a>
+
+            <a href="#data-section" class="nav-item">
+                ▤ Data Management
+            </a>
+
+            <a href="#analyst-section" class="nav-item">
+                ✧ AI Data Analyst
+            </a>
+
+            <a href="#visualization-section" class="nav-item">
+                ▥ Visualizations
+            </a>
+
+            <a href="#sql-section" class="nav-item">
+                ⌘ SQL Explorer
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="status-indicator"></div>
+
+            <span>AI Agent Workspace</span>
+
+            <p>Intelligent Analytics Platform</p>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ==========================================
+         MAIN CONTENT
+    ========================================== -->
+
+    <main class="main-content">
+
+
+        <!-- ==========================================
+             HEADER
+        ========================================== -->
+
+        <header class="topbar">
+
+            <div>
+
+                <p class="breadcrumb">
+                    Workspace / Dashboard
+                </p>
+
+                <h1>Business Intelligence Dashboard</h1>
+
+            </div>
+
+
+            <!-- HEADER ACTIONS -->
+
+            <div class="topbar-actions">
+
+                <a href="#history-section" class="history-shortcut">
+
+                    <span class="history-shortcut-icon">◷</span>
+
+                    <span>History</span>
+
+                </a>
+
+
+                <div class="profile">
+
+                    <div class="profile-icon">AI</div>
+
+                    <div>
+                        <strong>AI Analyst</strong>
+                        <span>Workspace</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ==========================================
+             OVERVIEW
+        ========================================== -->
+
+        <section id="overview" class="section">
+
+            <div class="welcome-section">
+
+                <div>
+
+                    <p class="eyebrow">
+                        INTELLIGENT ANALYTICS PLATFORM
+                    </p>
+
+                    <h2>Turn your data into decisions.</h2>
+
+                    <p>
+                        Upload business data, ask questions
+                        and discover insights using AI.
+                    </p>
+
+                </div>
+
+                <div class="welcome-icon">✧</div>
+
+            </div>
+
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Analytics Overview</h2>
+                    <p>Your business intelligence workspace</p>
+                </div>
+
+            </div>
+
+
+            <div class="kpi-grid">
+
+                <div class="kpi-card">
+
+                    <span class="kpi-icon purple">▤</span>
+
+                    <p>Dataset Status</p>
+
+                    <h3 id="kpi-dataset">No dataset</h3>
+
+                    <span>Current workspace</span>
+
+                </div>
+
+
+                <div class="kpi-card">
+
+                    <span class="kpi-icon blue">⌘</span>
+
+                    <p>Queries Executed</p>
+
+                    <h3 id="kpi-queries">0</h3>
+
+                    <span>AI-generated queries</span>
+
+                </div>
+
+
+                <div class="kpi-card">
+
+                    <span class="kpi-icon green">✓</span>
+
+                    <p>Agent Status</p>
+
+                    <h3>Ready</h3>
+
+                    <span>
+                        Gemini connected through backend
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             DATA MANAGEMENT
+        ========================================== -->
+
+        <section id="data-section" class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Data Management</h2>
+                    <p>
+                        Upload your business dataset to begin analysis.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="panel upload-panel">
+
+                <div class="panel-heading">
+
+                    <div>
+                        <h3>Upload Dataset</h3>
+                        <p>
+                            Supported formats: CSV and Excel (.xlsx)
+                        </p>
+                    </div>
+
+                    <span class="panel-icon">⇧</span>
+
+                </div>
+
+
+                <div class="upload-area">
+
+                    <div class="upload-symbol">↑</div>
+
+                    <h3>Select your business dataset</h3>
+
+                    <p>
+                        Choose a CSV or XLSX file from your computer.
+                    </p>
+
+
+                    <input
+                        type="file"
+                        id="dataset-file"
+                        accept=".csv,.xlsx"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="upload-button"
+                        onclick="uploadDataset()"
+                    >
+                        Upload Dataset
+                    </button>
+
+                </div>
+
+
+                <p id="upload-status" class="status-message"></p>
+
+                <div id="dataset-info" class="dataset-info"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             AI DATA ANALYST
+        ========================================== -->
+
+        <section id="analyst-section" class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>AI Data Analyst</h2>
+                    <p>
+                        Ask questions about your uploaded business data.
+                    </p>
+                </div>
+
+                <span class="ai-badge">✧ AI Powered</span>
+
+            </div>
+
+
+            <div class="panel analyst-panel">
+
+                <div class="analyst-intro">
+
+                    <div class="assistant-avatar">✧</div>
+
+                    <div>
+                        <h3>What would you like to know?</h3>
+
+                        <p>
+                            Ask in natural language. Your AI agent
+                            will generate and execute SQL.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <textarea
+                    id="question"
+                    placeholder="Example: Show total quantity sold by product..."
+                    rows="4"
+                ></textarea>
+
+
+                <div class="question-actions">
+
+                    <span>
+                        Ask questions about your dataset
+                    </span>
+
+                    <button
+                        type="button"
+                        id="ask-button"
+                        onclick="askQuestion()"
+                    >
+                        ✧ Ask AI
+                    </button>
+
+                </div>
+
+
+                <p id="loading" class="status-message"></p>
+
+                <p id="error-message" class="error-message"></p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             QUERY RESULTS
+        ========================================== -->
+
+        <section id="results-section" class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Query Results</h2>
+                    <p>Results generated by your AI agent.</p>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="export-controls">
+
+                    <button
+                        type="button"
+                        id="export-csv"
+                        class="download-button"
+                        disabled
+                    >
+                        ⬇ Export as CSV
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="export-excel"
+                        class="download-button"
+                        disabled
+                    >
+                        ⬇ Export as Excel
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="table-container"
+                    class="table-container"
+                >
+
+                    <p class="empty-state">
+                        Your query results will appear here.
+                    </p>
+
+                </div>
+                <!-- AI BUSINESS INSIGHTS -->
+            <div class="insights-panel">
+                <h2>✨ AI Business Insights</h2>
+
+                <div id="ai-insights">
+                    <p>Run a query to generate business insights.</p>
+                </div>
+            </div>
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             DATA VISUALIZATIONS
+        ========================================== -->
+
+        <section
+            id="visualization-section"
+            class="section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Data Visualizations</h2>
+
+                    <p>
+                        Explore your business data visually.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div
+                    id="chart-recommendation"
+                    class="chart-recommendation"
+                ></div>
+
+
+                <div class="chart-controls">
+
+                    <label for="chart-type">
+                        Change Chart Type:
+                    </label>
+
+
+                    <select id="chart-type">
+
+                        <option value="auto">
+                            Auto Recommended
+                        </option>
+
+                        <option value="bar">
+                            Bar Chart
+                        </option>
+
+                        <option value="line">
+                            Line Chart
+                        </option>
+
+                        <option value="pie">
+                            Pie Chart
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <button
+                    id="download-chart"
+                    class="download-button"
+                    type="button"
+                    disabled
+                >
+                    ⬇ Download Chart as PNG
+                </button>
+
+
+                <div id="chart-container"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             SQL EXPLORER
+        ========================================== -->
+
+        <section id="sql-section" class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>SQL Explorer</h2>
+
+                    <p>
+                        Inspect the SQL generated by your AI agent.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <pre
+                    id="sql-result"
+                    class="sql-output"
+                >Your generated SQL will appear here.</pre>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             QUERY HISTORY
+        ========================================== -->
+
+        <section id="history-section" class="section">
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Query History</h2>
+
+                    <p>
+                        View and revisit your previous AI queries.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="panel query-history-panel">
+
+                <div id="query-history-container">
+
+                    <p class="empty-state">
+                        Your previous queries will appear here.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==========================================
+             FOOTER
+        ========================================== -->
+
+        <footer class="footer">
+
+            InsightIQ · AI-Powered Business Intelligence Agent
+
+        </footer>
+
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     JAVASCRIPT LIBRARIES
+========================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
