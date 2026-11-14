@@ -9,6 +9,9 @@ import pandas as pd
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "database" / "business.db"
 
+# Create database directory automatically if it doesn't exist
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+
 # Number of CSV rows processed at a time
 CHUNK_SIZE = 10000
 
