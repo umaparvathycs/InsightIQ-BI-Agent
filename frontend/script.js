@@ -6,7 +6,8 @@
 // Restore selected dataset
 let uploadedTableName =
     localStorage.getItem("uploadedTableName") || null;
-
+// Backend API URL
+const API_BASE_URL = "https://insightiq-bi-agent.onrender.com";
 // Restore query count
 let queryCount =
     Number(localStorage.getItem("queryCount") || 0);
@@ -84,7 +85,7 @@ async function uploadDataset() {
     try {
 
         const response = await fetch(
-            "http://127.0.0.1:8000/upload-dataset",
+            `${API_BASE_URL}/upload-dataset`,
             {
                 method: "POST",
                 body: formData
@@ -213,7 +214,7 @@ async function askQuestion() {
     try {
 
         const response = await fetch(
-            "http://127.0.0.1:8000/ask",
+            `${API_BASE_URL}/ask`,
             {
                 method: "POST",
 
@@ -1050,7 +1051,7 @@ async function generateAIInsights(question, columns, rows) {
     try {
 
         const response = await fetch(
-            "http://127.0.0.1:8000/generate-insights",
+            `${API_BASE_URL}/generate-insights`,
             {
                 method: "POST",
                 headers: {
